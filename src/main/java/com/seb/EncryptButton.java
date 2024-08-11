@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Arrays;
 
 public class EncryptButton extends JButton implements ActionListener {
 
@@ -21,14 +22,14 @@ public class EncryptButton extends JButton implements ActionListener {
         if (selectedFile != null) {
             if (selectedFile.isDirectory()) {
                 try {
-                    Main.encryptDir(main.algorithm, Main.getKeyFromPassword(main.passwordField.getText(), main.salt), selectedFile);
+                    Main.encryptDir(main.algorithm, Main.getKeyFromPassword(Arrays.toString(main.passwordField.getPassword()), main.salt), selectedFile);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
             else {
                 try {
-                    Main.encryptFile(main.algorithm, Main.getKeyFromPassword(main.passwordField.getText(), main.salt), selectedFile, new File(selectedFile.getAbsolutePath() + "encrypted"));
+                    Main.encryptFile(main.algorithm, Main.getKeyFromPassword(Arrays.toString(main.passwordField.getPassword()), main.salt), selectedFile, new File(selectedFile.getAbsolutePath() + "encrypted"));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

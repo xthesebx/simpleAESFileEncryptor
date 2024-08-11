@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Objects;
 
 public class Main {
 
@@ -68,7 +69,7 @@ public class Main {
 
     public static void encryptDir(String algorithm, SecretKey key, File inputFile) throws Exception {
         inputFile.mkdirs();
-        for (File file : inputFile.listFiles()) {
+        for (File file : Objects.requireNonNull(inputFile.listFiles())) {
             if (file.isDirectory()) {
                 encryptDir(algorithm, key, file);
             }
@@ -82,7 +83,7 @@ public class Main {
 
     public static void decryptDir(String algorithm, SecretKey key, File inputFile) throws Exception {
         inputFile.mkdirs();
-        for (File file : inputFile.listFiles()) {
+        for (File file : Objects.requireNonNull(inputFile.listFiles())) {
             if (file.isDirectory()) decryptDir(algorithm, key, file);
             else {
                 File outputFile = new File((inputFile.getName() + "/" + file.getName()).replace("encrypted", ""));
@@ -92,18 +93,10 @@ public class Main {
         inputFile.delete();
     }
 
-    public static SecretKey generateKey(int n) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(n);
-        SecretKey key = keyGenerator.generateKey();
-        return key;
-    }
-
     public static SecretKey getKeyFromPassword(String password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 65536, 256);
-        SecretKey key = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-        return key;
+        return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
     }
 
     public static IvParameterSpec generateIV() {
@@ -144,8 +137,7 @@ public class Main {
         byte[] buffer = new byte[16];
         int bytesRead;
         fis.read(buffer);
-        byte[] ivBytes = buffer;
-        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+        IvParameterSpec iv = new IvParameterSpec(buffer);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
         while ((bytesRead = fis.read(buffer)) != -1) {
             byte[] cipherText = cipher.update(buffer, 0, bytesRead);
